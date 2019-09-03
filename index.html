@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Just for test</title>
+  <style>
+    p {
+      /* width: 100px; */
+      background-color: bisque
+    }
+  </style>
+</head>
+
+<body>
+  <button id="getToken">GETTOKEN</button><br />
+  <button id="download">Download</button><br />
+  <p id="token"></p>
+</body>
+<script src="./jquery.js"></script>
+<script>
+  let token = "123456";
+  function download() {
+    var url = "http://localhost:3000/sr/mail/export?customer_id=123456";
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);//get请求，请求地址，是否异步
+    xhr.setRequestHeader(
+      "Authorization",
+      `Bearer ${token}`,
+    );
+    xhr.responseType = "blob";    // 返回类型blob
+    xhr.onload = function () {// 请求完成处理函数
+      if (this.status === 200) {
+        var nameInfo = xhr.getResponseHeader("Content-disposition");
+        let filename = decodeURI(nameInfo).match(/.*\'\'(.*)/)[1];
+        var blob = this.response;// 获取返回值
+        var a = document.createElement('a');
+        a.download = filename;
+        a.href = window.URL.createObjectURL(blob);
+        a.click();
+      }
+    };
+    // 发送ajax请求
+    xhr.send();
+  }
+  $(document).ready(function () {
+    $("#getToken").click(function () {
+      let signIn = "http://localhost:3000/signin"
+      let result = $.ajax({ url: signIn, async: false });
+      token = result.responseJSON.data["access_token"]
+      $("#token").text(token);
+    });
+
+    $("#download").click(() => {
+      download();
+    });
+  });
+</script>
+
+</html>
